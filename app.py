@@ -5,69 +5,59 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 
 # ── Page config ────────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Laptop Price Predictor",
-    page_icon="💻",
-    layout="centered"
-)
+st.set_page_config(page_title="Laptop Price Predictor", page_icon="💻", layout="centered")
 
-# ── Language Strings ───────────────────────────────────────────────────────────
+# ── Language ───────────────────────────────────────────────────────────────────
 LANG = {
     "en": {
         "title": "Laptop Price Predictor",
         "subtitle": "AI-powered price estimation for the Egyptian market",
         "section": "📋 Laptop Specifications",
-        "brand": "Brand", "storage": "Storage (GB)", "cpu": "CPU Generation",
-        "condition": "Condition", "ram": "RAM (GB)", "year": "Year",
+        "brand": "Brand", "model": "Model", "ram": "RAM (GB)",
+        "storage": "Storage (GB)", "storage_type": "Storage Type",
+        "cpu": "CPU Generation", "year": "Year", "condition": "Condition",
+        "screen": "Screen Size (inch)", "gpu": "GPU", "touch": "Touchscreen",
         "button": "⚡ Predict Price", "est_label": "✨ Estimated Price Range",
         "low": "Low", "mid": "Mid", "high": "High",
         "currency_label": "💱 Currency",
         "live_rates": "✅ Live exchange rates loaded",
-        "fallback_rates": "⚠️ Using cached rates (live fetch failed)",
+        "fallback_rates": "⚠️ Using cached rates",
         "footer": "Powered by Random Forest · Built with Streamlit",
-        "dir": "ltr",
     },
     "ar": {
         "title": "توقع سعر اللاب توب",
         "subtitle": "تقدير الأسعار بالذكاء الاصطناعي للسوق المصري",
         "section": "📋 مواصفات اللاب توب",
-        "brand": "الماركة", "storage": "التخزين (جيجا)", "cpu": "جيل المعالج",
-        "condition": "الحالة", "ram": "الرام (جيجا)", "year": "سنة الصنع",
+        "brand": "الماركة", "model": "الموديل", "ram": "الرام (جيجا)",
+        "storage": "التخزين (جيجا)", "storage_type": "نوع التخزين",
+        "cpu": "جيل المعالج", "year": "سنة الصنع", "condition": "الحالة",
+        "screen": "حجم الشاشة (إنش)", "gpu": "كارت الشاشة", "touch": "شاشة لمس",
         "button": "⚡ توقع السعر", "est_label": "✨ نطاق السعر المتوقع",
         "low": "الأدنى", "mid": "المتوسط", "high": "الأعلى",
         "currency_label": "💱 العملة",
         "live_rates": "✅ تم تحميل أسعار الصرف الحية",
         "fallback_rates": "⚠️ يتم استخدام أسعار محفوظة",
         "footer": "يعمل بـ Random Forest · مبني بـ Streamlit",
-        "dir": "rtl",
     }
 }
 
-# ── Fallback rates (if API fails) ─────────────────────────────────────────────
 FALLBACK_RATES = {
-    "🇪🇬 EGP": 1.0,
-    "🇺🇸 USD": 0.0212,
-    "🇪🇺 EUR": 0.0180,
-    "🇸🇦 SAR": 0.0752,
-    "🇦🇪 AED": 0.0731,
+    "🇪🇬 EGP": 1.0, "🇺🇸 USD": 0.01990,
+    "🇪🇺 EUR": 0.01710, "🇸🇦 SAR": 0.07450, "🇦🇪 AED": 0.07320,
 }
 
-# ── Fetch Live Rates — FREE, no API key needed ────────────────────────────────
-@st.cache_data(ttl=86400)  # Refresh once every 24 hours
+@st.cache_data(ttl=86400)
 def fetch_live_rates():
     try:
-        url = "https://open.er-api.com/v6/latest/EGP"
-        res = requests.get(url, timeout=5)
+        res  = requests.get("https://open.er-api.com/v6/latest/EGP", timeout=5)
         data = res.json()
         if data.get("result") == "success":
             r = data["rates"]
-            return {
-                "🇪🇬 EGP": 1.0,
-                "🇺🇸 USD": round(r.get("USD", 0.0212), 6),
-                "🇪🇺 EUR": round(r.get("EUR", 0.0180), 6),
-                "🇸🇦 SAR": round(r.get("SAR", 0.0752), 6),
-                "🇦🇪 AED": round(r.get("AED", 0.0731), 6),
-            }, True
+            return {"🇪🇬 EGP": 1.0,
+                    "🇺🇸 USD": round(r.get("USD", 0.01990), 6),
+                    "🇪🇺 EUR": round(r.get("EUR", 0.01710), 6),
+                    "🇸🇦 SAR": round(r.get("SAR", 0.07450), 6),
+                    "🇦🇪 AED": round(r.get("AED", 0.07320), 6)}, True
     except Exception:
         pass
     return FALLBACK_RATES, False
@@ -79,7 +69,7 @@ st.markdown("""
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, [class*="css"] { background-color: #0a0a0f; color: #e8e6f0; }
-.block-container { padding: 2rem 1.5rem 4rem !important; max-width: 720px !important; }
+.block-container { padding: 2rem 1.5rem 4rem !important; max-width: 760px !important; }
 
 .hero { text-align: center; padding: 2.5rem 1rem 1.5rem; }
 .hero-icon { font-size: 3rem; display: block; margin-bottom: 0.4rem; filter: drop-shadow(0 0 24px #7c3aed88); }
@@ -97,10 +87,7 @@ html, body, [class*="css"] { background-color: #0a0a0f; color: #e8e6f0; }
     border-radius: 20px; padding: 4px 14px;
     font-size: 0.72rem; font-weight: 600; color: #4ade80; letter-spacing: 0.06em;
 }
-.live-dot {
-    width: 7px; height: 7px; border-radius: 50%; background: #4ade80;
-    animation: pulse 1.5s infinite;
-}
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 .card {
@@ -108,20 +95,15 @@ html, body, [class*="css"] { background-color: #0a0a0f; color: #e8e6f0; }
     border: 1px solid #2a2a4a; border-radius: 20px;
     padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 8px 32px #00000055;
 }
-.card-title {
-    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
-    text-transform: uppercase; color: #7c3aed; margin-bottom: 1.2rem;
-}
+.card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #7c3aed; margin-bottom: 1.2rem; }
 
 label, .stSelectbox label {
     font-size: 0.82rem !important; font-weight: 500 !important;
-    color: #94a3b8 !important; letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
+    color: #94a3b8 !important; letter-spacing: 0.04em !important; text-transform: uppercase !important;
 }
 div[data-baseweb="select"] > div {
     background-color: #0d0d1a !important; border: 1px solid #2a2a4a !important;
-    border-radius: 12px !important; color: #e8e6f0 !important;
-    font-size: 0.95rem !important; transition: border-color 0.2s;
+    border-radius: 12px !important; color: #e8e6f0 !important; font-size: 0.95rem !important; transition: border-color 0.2s;
 }
 div[data-baseweb="select"] > div:hover { border-color: #7c3aed !important; }
 div[data-baseweb="select"] > div:focus-within { border-color: #a78bfa !important; box-shadow: 0 0 0 3px #7c3aed22 !important; }
@@ -149,7 +131,6 @@ div.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 28p
 .range-price { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #e8e6f0; }
 .range-currency { font-size: 0.72rem; color: #64748b; margin-top: 0.2rem; }
 .result-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #7c3aed; margin-bottom: 0.2rem; text-align: center; }
-
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .rtl { direction: rtl; text-align: right; font-family: 'Cairo', sans-serif !important; }
@@ -161,74 +142,94 @@ div.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 28p
 </style>
 """, unsafe_allow_html=True)
 
-# ── Load Model ─────────────────────────────────────────────────────────────────
+# ── Load & Train ───────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
     df = pd.read_excel("laptops_training_dataset.xlsx")
-    le_brand = LabelEncoder()
-    le_condition = LabelEncoder()
-    df['Brand']     = le_brand.fit_transform(df['Brand'])
-    df['Condition'] = le_condition.fit_transform(df['Condition'])
-    X = df.drop('Price', axis=1)
-    y = df['Price']
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    return model, le_brand, le_condition
+    cat_cols = ["Brand", "Model", "Storage_Type", "Condition", "GPU", "Touchscreen"]
+    encoders = {}
+    for col in cat_cols:
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col])
+        encoders[col] = le
+    X = df.drop("Price", axis=1)
+    y = df["Price"]
+    mdl = RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)
+    mdl.fit(X, y)
+    return mdl, encoders
 
-model, le_brand, le_condition = load_model()
+@st.cache_data
+def load_raw():
+    return pd.read_excel("laptops_training_dataset.xlsx")
 
-# ── Fetch Rates ────────────────────────────────────────────────────────────────
+model, encoders = load_model()
+df_orig = load_raw()
 CURRENCIES, is_live = fetch_live_rates()
 
-# ── Language Toggle ────────────────────────────────────────────────────────────
+# ── Language toggle ────────────────────────────────────────────────────────────
 lang_choice = st.radio("", ["🇬🇧 English", "🇪🇬 العربية"], horizontal=True)
 lang = "ar" if "العربية" in lang_choice else "en"
-L = LANG[lang]
-rtl_class = "rtl" if lang == "ar" else ""
+L   = LANG[lang]
+rtl = "rtl" if lang == "ar" else ""
 
 # ── Hero ───────────────────────────────────────────────────────────────────────
 st.markdown(f"""
-<div class="hero {rtl_class}">
+<div class="hero {rtl}">
     <span class="hero-icon">💻</span>
     <h1>{L['title']}</h1>
     <p>{L['subtitle']}</p>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Live Badge ─────────────────────────────────────────────────────────────────
 if is_live:
     st.markdown(f'<div style="text-align:center;margin-bottom:1rem"><span class="live-badge"><span class="live-dot"></span>{L["live_rates"]}</span></div>', unsafe_allow_html=True)
 else:
     st.warning(L["fallback_rates"])
 
-# ── Currency Selector ──────────────────────────────────────────────────────────
-st.markdown(f'<div class="card {rtl_class}"><div class="card-title">{L["currency_label"]}</div>', unsafe_allow_html=True)
+# ── Currency ───────────────────────────────────────────────────────────────────
+st.markdown(f'<div class="card {rtl}"><div class="card-title">{L["currency_label"]}</div>', unsafe_allow_html=True)
 currency = st.selectbox("", list(CURRENCIES.keys()), label_visibility="collapsed")
 rate = CURRENCIES[currency]
 currency_code = currency.split(" ")[1]
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ── Form ───────────────────────────────────────────────────────────────────────
-st.markdown(f'<div class="card {rtl_class}"><div class="card-title">{L["section"]}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="card {rtl}"><div class="card-title">{L["section"]}</div>', unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 with col1:
-    brand   = st.selectbox(L['brand'],   le_brand.classes_)
-    storage = st.selectbox(L['storage'], [128, 256, 512, 1024])
-    cpu     = st.selectbox(L['cpu'],     [4,5,6,7,8,9,10,11])
+    brand        = st.selectbox(L['brand'],        sorted(df_orig["Brand"].unique()))
+    models_list  = sorted(df_orig[df_orig["Brand"] == brand]["Model"].unique())
+    model_sel    = st.selectbox(L['model'],        models_list)
+    ram          = st.selectbox(L['ram'],          sorted(df_orig["RAM"].unique()))
+    storage      = st.selectbox(L['storage'],      sorted(df_orig["Storage"].unique()))
+    storage_type = st.selectbox(L['storage_type'], sorted(df_orig["Storage_Type"].unique()))
 with col2:
-    condition = st.selectbox(L['condition'], le_condition.classes_)
-    ram       = st.selectbox(L['ram'],       [4, 8, 16, 32])
-    year      = st.selectbox(L['year'],      list(range(2018, 2027)))
+    cpu_gen     = st.selectbox(L['cpu'],       sorted(df_orig["CPU_Gen"].unique()))
+    year        = st.selectbox(L['year'],      sorted(df_orig["Year"].unique(), reverse=True))
+    condition   = st.selectbox(L['condition'], sorted(df_orig["Condition"].unique()))
+    screen      = st.selectbox(L['screen'],    sorted(df_orig["Screen_Size"].unique()))
+    gpu         = st.selectbox(L['gpu'],       sorted(df_orig["GPU"].unique()))
+    touchscreen = st.selectbox(L['touch'],     sorted(df_orig["Touchscreen"].unique()))
+
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ── Predict ────────────────────────────────────────────────────────────────────
 if st.button(L['button']):
-    brand_code     = le_brand.transform([brand])[0]
-    condition_code = le_condition.transform([condition])[0]
-    new_data = pd.DataFrame({
-        'Brand': [brand_code], 'RAM': [ram], 'Storage': [storage],
-        'CPU_Gen': [cpu], 'Year': [year], 'Condition': [condition_code]
-    })
+    input_data = {
+        "Brand":        encoders["Brand"].transform([brand])[0],
+        "Model":        encoders["Model"].transform([model_sel])[0],
+        "RAM":          ram,
+        "Storage":      storage,
+        "Storage_Type": encoders["Storage_Type"].transform([storage_type])[0],
+        "CPU_Gen":      cpu_gen,
+        "Year":         year,
+        "Condition":    encoders["Condition"].transform([condition])[0],
+        "Screen_Size":  screen,
+        "GPU":          encoders["GPU"].transform([gpu])[0],
+        "Touchscreen":  encoders["Touchscreen"].transform([touchscreen])[0],
+    }
+    new_data   = pd.DataFrame([input_data])
     mid_price  = model.predict(new_data)[0]
     low_price  = mid_price * 0.88
     high_price = mid_price * 1.12
@@ -256,4 +257,4 @@ if st.button(L['button']):
     """, unsafe_allow_html=True)
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
-st.markdown(f'<div class="footer {rtl_class}">{L["footer"]}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="footer {rtl}">{L["footer"]}</div>', unsafe_allow_html=True)
