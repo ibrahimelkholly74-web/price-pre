@@ -10,56 +10,102 @@ st.set_page_config(
     layout="centered"
 )
 
+# ── Language Strings ───────────────────────────────────────────────────────────
+LANG = {
+    "en": {
+        "title": "Laptop Price Predictor",
+        "subtitle": "AI-powered price estimation for the Egyptian market",
+        "section": "📋 Laptop Specifications",
+        "brand": "Brand",
+        "storage": "Storage (GB)",
+        "cpu": "CPU Generation",
+        "condition": "Condition",
+        "ram": "RAM (GB)",
+        "year": "Year",
+        "button": "⚡ Predict Price",
+        "est_label": "✨ Estimated Price Range",
+        "low": "Low",
+        "mid": "Mid",
+        "high": "High",
+        "currency_label": "💱 Currency",
+        "footer": "Powered by Random Forest · Built with Streamlit",
+        "dir": "ltr",
+    },
+    "ar": {
+        "title": "توقع سعر اللاب توب",
+        "subtitle": "تقدير الأسعار بالذكاء الاصطناعي للسوق المصري",
+        "section": "📋 مواصفات اللاب توب",
+        "brand": "الماركة",
+        "storage": "التخزين (جيجا)",
+        "cpu": "جيل المعالج",
+        "condition": "الحالة",
+        "ram": "الرام (جيجا)",
+        "year": "سنة الصنع",
+        "button": "⚡ توقع السعر",
+        "est_label": "✨ نطاق السعر المتوقع",
+        "low": "الأدنى",
+        "mid": "المتوسط",
+        "high": "الأعلى",
+        "currency_label": "💱 العملة",
+        "footer": "يعمل بـ Random Forest · مبني بـ Streamlit",
+        "dir": "rtl",
+    }
+}
+
+# ── Currency rates (relative to EGP) ──────────────────────────────────────────
+CURRENCIES = {
+    "🇪🇬 EGP": 1.0,
+    "🇺🇸 USD": 0.021,
+    "🇪🇺 EUR": 0.019,
+    "🇸🇦 SAR": 0.079,
+    "🇦🇪 AED": 0.077,
+}
+
 # ── Custom CSS ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=Cairo:wght@400;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
     background-color: #0a0a0f;
     color: #e8e6f0;
 }
 
-/* Remove default streamlit padding */
 .block-container {
     padding: 2rem 1.5rem 4rem !important;
     max-width: 720px !important;
 }
 
-/* ── Hero Header ── */
+/* Hero */
 .hero {
     text-align: center;
-    padding: 3rem 1rem 2rem;
-    position: relative;
+    padding: 2.5rem 1rem 1.5rem;
 }
 .hero-icon {
-    font-size: 3.2rem;
+    font-size: 3rem;
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     filter: drop-shadow(0 0 24px #7c3aed88);
 }
 .hero h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.6rem;
+    font-size: 2.4rem;
     font-weight: 800;
     background: linear-gradient(135deg, #a78bfa, #60a5fa, #f472b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    line-height: 1.1;
-    margin-bottom: 0.6rem;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
 }
 .hero p {
     color: #94a3b8;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 300;
-    letter-spacing: 0.02em;
 }
 
-/* ── Card ── */
+/* Card */
 .card {
     background: linear-gradient(145deg, #13131f, #1a1a2e);
     border: 1px solid #2a2a4a;
@@ -69,7 +115,6 @@ html, body, [class*="css"] {
     box-shadow: 0 8px 32px #00000055;
 }
 .card-title {
-    font-family: 'Syne', sans-serif;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -78,51 +123,42 @@ html, body, [class*="css"] {
     margin-bottom: 1.2rem;
 }
 
-/* ── Selectbox & Label overrides ── */
+/* Labels */
 label, .stSelectbox label {
-    font-family: 'DM Sans', sans-serif !important;
     font-size: 0.82rem !important;
     font-weight: 500 !important;
     color: #94a3b8 !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
-    margin-bottom: 4px !important;
 }
 
+/* Selectbox */
 div[data-baseweb="select"] > div {
     background-color: #0d0d1a !important;
     border: 1px solid #2a2a4a !important;
     border-radius: 12px !important;
     color: #e8e6f0 !important;
-    font-family: 'DM Sans', sans-serif !important;
     font-size: 0.95rem !important;
     transition: border-color 0.2s;
 }
-div[data-baseweb="select"] > div:hover {
-    border-color: #7c3aed !important;
-}
+div[data-baseweb="select"] > div:hover { border-color: #7c3aed !important; }
 div[data-baseweb="select"] > div:focus-within {
     border-color: #a78bfa !important;
     box-shadow: 0 0 0 3px #7c3aed22 !important;
 }
-
-/* Dropdown menu */
 ul[role="listbox"] {
     background-color: #13131f !important;
     border: 1px solid #2a2a4a !important;
     border-radius: 12px !important;
 }
-li[role="option"]:hover {
-    background-color: #1e1e3a !important;
-}
+li[role="option"]:hover { background-color: #1e1e3a !important; }
 
-/* ── Button ── */
+/* Button */
 div.stButton > button {
     width: 100%;
     padding: 0.85rem 2rem;
     background: linear-gradient(135deg, #7c3aed, #2563eb);
     color: #fff;
-    font-family: 'Syne', sans-serif;
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -138,61 +174,75 @@ div.stButton > button:hover {
     box-shadow: 0 8px 28px #7c3aed66;
     background: linear-gradient(135deg, #8b5cf6, #3b82f6);
 }
-div.stButton > button:active {
-    transform: translateY(0px);
-}
 
-/* ── Result box ── */
-.result-box {
-    background: linear-gradient(135deg, #1a1040, #0f1f3d);
-    border: 1px solid #7c3aed55;
-    border-radius: 20px;
-    padding: 2rem;
+/* Range result boxes */
+.range-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.2rem;
+}
+.range-box {
+    border-radius: 16px;
+    padding: 1.2rem 0.8rem;
     text-align: center;
-    margin-top: 1.5rem;
-    box-shadow: 0 0 40px #7c3aed22;
     animation: fadeUp 0.4s ease;
 }
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+.range-box.low  { background: #0f1f2a; border: 1px solid #0ea5e955; }
+.range-box.mid  { background: #1a1040; border: 1px solid #7c3aed88; box-shadow: 0 0 30px #7c3aed22; }
+.range-box.high { background: #1f0f2a; border: 1px solid #f472b655; }
+.range-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
 }
-.result-label {
+.low  .range-label { color: #38bdf8; }
+.mid  .range-label { color: #a78bfa; }
+.high .range-label { color: #f472b6; }
+.range-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #e8e6f0;
+}
+.range-currency {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+.result-title {
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #a78bfa;
-    margin-bottom: 0.5rem;
-}
-.result-price {
-    font-family: 'Syne', sans-serif;
-    font-size: 3rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #a78bfa, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-}
-.result-currency {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #60a5fa;
-    margin-top: 0.3rem;
+    color: #7c3aed;
+    margin-bottom: 0.2rem;
+    text-align: center;
 }
 
-/* ── Footer ── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* RTL support */
+.rtl { direction: rtl; text-align: right; font-family: 'Cairo', sans-serif !important; }
+.rtl label, .rtl .card-title, .rtl .result-title { font-family: 'Cairo', sans-serif !important; letter-spacing: 0 !important; }
+
+/* Lang toggle */
+.stRadio > div { flex-direction: row !important; gap: 0.5rem; }
+.stRadio label { font-size: 0.85rem !important; color: #a78bfa !important; }
+
+/* Footer */
 .footer {
     text-align: center;
     color: #3a3a5c;
     font-size: 0.78rem;
     margin-top: 3rem;
-    padding-bottom: 1rem;
 }
 
-/* Hide streamlit branding */
 #MainMenu, footer, header { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
@@ -203,7 +253,7 @@ def load_model():
     df = pd.read_excel("laptops_training_dataset.xlsx")
     le_brand = LabelEncoder()
     le_condition = LabelEncoder()
-    df['Brand'] = le_brand.fit_transform(df['Brand'])
+    df['Brand']     = le_brand.fit_transform(df['Brand'])
     df['Condition'] = le_condition.fit_transform(df['Condition'])
     X = df.drop('Price', axis=1)
     y = df['Price']
@@ -213,34 +263,45 @@ def load_model():
 
 model, le_brand, le_condition = load_model()
 
+# ── Language Toggle ────────────────────────────────────────────────────────────
+lang_choice = st.radio("", ["🇬🇧 English", "🇪🇬 العربية"], horizontal=True)
+lang = "ar" if "العربية" in lang_choice else "en"
+L = LANG[lang]
+rtl_class = "rtl" if lang == "ar" else ""
+
 # ── Hero ───────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="hero">
+st.markdown(f"""
+<div class="hero {rtl_class}">
     <span class="hero-icon">💻</span>
-    <h1>Laptop Price Predictor</h1>
-    <p>AI-powered price estimation for the Egyptian market</p>
+    <h1>{L['title']}</h1>
+    <p>{L['subtitle']}</p>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Form Card ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="card"><div class="card-title">📋 Laptop Specifications</div>', unsafe_allow_html=True)
+# ── Currency Selector ──────────────────────────────────────────────────────────
+st.markdown(f'<div class="card {rtl_class}"><div class="card-title">{L["currency_label"]}</div>', unsafe_allow_html=True)
+currency = st.selectbox("", list(CURRENCIES.keys()), label_visibility="collapsed")
+rate = CURRENCIES[currency]
+currency_code = currency.split(" ")[1]
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ── Form Card ──────────────────────────────────────────────────────────────────
+st.markdown(f'<div class="card {rtl_class}"><div class="card-title">{L["section"]}</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
-    brand     = st.selectbox("Brand",         le_brand.classes_)
-    storage   = st.selectbox("Storage (GB)",  [128, 256, 512, 1024])
-    cpu       = st.selectbox("CPU Generation",[4,5,6,7,8,9,10,11])
+    brand   = st.selectbox(L['brand'],   le_brand.classes_)
+    storage = st.selectbox(L['storage'], [128, 256, 512, 1024])
+    cpu     = st.selectbox(L['cpu'],     [4,5,6,7,8,9,10,11])
 with col2:
-    condition = st.selectbox("Condition",     le_condition.classes_)
-    ram       = st.selectbox("RAM (GB)",      [4, 8, 16, 32])
-    year      = st.selectbox("Year",          list(range(2018, 2027)))
+    condition = st.selectbox(L['condition'], le_condition.classes_)
+    ram       = st.selectbox(L['ram'],       [4, 8, 16, 32])
+    year      = st.selectbox(L['year'],      list(range(2018, 2027)))
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ── Predict Button ────────────────────────────────────────────────────────────
-predict = st.button("⚡ Predict Price")
-
-if predict:
+# ── Predict ────────────────────────────────────────────────────────────────────
+if st.button(L['button']):
     brand_code     = le_brand.transform([brand])[0]
     condition_code = le_condition.transform([condition])[0]
 
@@ -253,15 +314,37 @@ if predict:
         'Condition': [condition_code]
     })
 
-    price = model.predict(new_data)[0]
+    mid_price = model.predict(new_data)[0]
+    low_price  = mid_price * 0.88
+    high_price = mid_price * 1.12
 
+    # Convert
+    low_c  = low_price  * rate
+    mid_c  = mid_price  * rate
+    high_c = high_price * rate
+
+    fmt = lambda v: f"{v:,.0f}"
+
+    st.markdown(f'<div class="result-title">{L["est_label"]}</div>', unsafe_allow_html=True)
     st.markdown(f"""
-    <div class="result-box">
-        <div class="result-label">✨ Estimated Price</div>
-        <div class="result-price">{price:,.0f}</div>
-        <div class="result-currency">Egyptian Pound · EGP</div>
+    <div class="range-grid">
+        <div class="range-box low">
+            <div class="range-label">{L['low']}</div>
+            <div class="range-price">{fmt(low_c)}</div>
+            <div class="range-currency">{currency_code}</div>
+        </div>
+        <div class="range-box mid">
+            <div class="range-label">{L['mid']}</div>
+            <div class="range-price">{fmt(mid_c)}</div>
+            <div class="range-currency">{currency_code}</div>
+        </div>
+        <div class="range-box high">
+            <div class="range-label">{L['high']}</div>
+            <div class="range-price">{fmt(high_c)}</div>
+            <div class="range-currency">{currency_code}</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-# ── Footer ────────────────────────────────────────────────────────────────────
-st.markdown('<div class="footer">Powered by Random Forest · Built with Streamlit</div>', unsafe_allow_html=True)
+# ── Footer ─────────────────────────────────────────────────────────────────────
+st.markdown(f'<div class="footer {rtl_class}">{L["footer"]}</div>', unsafe_allow_html=True)
