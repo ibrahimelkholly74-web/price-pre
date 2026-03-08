@@ -145,7 +145,7 @@ div.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 28p
 # ── Load & Train ───────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
-    df = pd.read_excel("laptops_training_dataset.xlsx")
+    df = pd.read_excel("hema.xlsx")
     cat_cols = ["Brand", "Model", "Storage_Type", "Condition", "GPU", "Touchscreen"]
     encoders = {}
     for col in cat_cols:
@@ -160,7 +160,7 @@ def load_model():
 
 @st.cache_data
 def load_raw():
-    return pd.read_excel("laptops_training_dataset.xlsx")
+    return pd.read_excel("hema.xlsx")
 
 model, encoders = load_model()
 df_orig = load_raw()
